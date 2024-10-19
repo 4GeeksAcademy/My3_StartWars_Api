@@ -158,6 +158,37 @@ def del_favorite_planet(user_id, planet_id):
     db.session.commit()
     return jsonify("El planeta se elimino de favorito se agrego exitosamente"), 201
 
+@app.route('/favorite/user/<int:user_id>/vehicle/<int:vehicle_id>', methods=['POST'])
+def add_favorite_vehicle(user_id, vehicle_id):
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    vehicle = Vehicle.query.get(vehicle_id)
+    if vehicle is None:
+        return jsonify({"error": "Vehicle not found"}), 404
+    is_favorite = FavoriteVehicle.query.filter_by(user_id=user_id, vehicle_id=vehicle_id).first()
+    if is_favorite:
+        return jsonify({"error": "Favorite already exists"}), 409
+    new_favorite = FavoriteVehicle(user_id=user_id, vehicle_id=vehicle_id)
+    db.session.add(new_favorite)
+    db.session.commit()
+    return jsonify("El Vehiculo favorito se agrego exitosamente"), 201
+
+@app.route('/favorite/user/<int:user_id>/planet/<int:vehicle_id>', methods=['DELETE'])
+def del_favorite_vehicle(user_id, vehicle_id):
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    vehicle = Vehicle.query.get(vehicle_id)
+    if vehicle is None:
+        return jsonify({"error": "Planet not found"}), 404
+    favorite = FavoriteVehicle.query.filter_by(user_id=user_id, vehicle_id=vehicle_id).first()
+    if favorite is None:
+        return jsonify({"error": "Favorite not found"}), 404
+    db.session.delete(favorite)
+    db.session.commit()
+    return jsonify("El vehiculo se elimino de favorito se agrego exitosamente"), 201
+
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
